@@ -16,6 +16,7 @@ from pydantic import BaseModel
 from transformers import pipeline
 import spacy
 
+<<<<<<< HEAD
 app = FastAPI()
 
 origins = ["*"]
@@ -28,6 +29,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+=======
+>>>>>>> 9ebf7b526ee8675fa4ebf64e7a129682f4a20a73
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s',

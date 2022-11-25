@@ -2,7 +2,7 @@ from typing import Union
 import logging
 import time
 from pdfminer.high_level import extract_text, extract_pages
-
+from fastapi.middleware.cors import CORSMiddleware
 from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 

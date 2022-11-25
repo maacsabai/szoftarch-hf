@@ -8,7 +8,6 @@ from elasticsearch import helpers
 
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
 
@@ -16,7 +15,7 @@ from pydantic import BaseModel
 from transformers import pipeline
 import spacy
 
-<<<<<<< HEAD
+
 app = FastAPI()
 
 origins = ["*"]
@@ -29,8 +28,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-=======
->>>>>>> 9ebf7b526ee8675fa4ebf64e7a129682f4a20a73
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] [%(name)s] %(message)s',
@@ -43,7 +40,7 @@ logging.basicConfig(
 
 ELASTIC_INDEX_NAME = 'uploaded_data'
 USER = 'elastic'
-PASSWORD = 'X-9T4-O6HqBfAPciKE+2'
+PASSWORD = '4Lnrd3BgtACXT61bP5GT'
 
 class Document(BaseModel):
     context: str
@@ -91,7 +88,6 @@ def init_backend():
 
 @app.post('/predict')
 def predict(document: Document):
-    print(document)
     start = time.time()
 
     predictions = qa_pipeline({

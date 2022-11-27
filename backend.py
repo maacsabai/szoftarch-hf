@@ -7,9 +7,11 @@ from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 
 
-from fastapi import FastAPI
+from fastapi import FastAPI,File, UploadFile
 import uvicorn
 from pydantic import BaseModel
+
+import shutil
 
 # ML
 from transformers import pipeline
@@ -40,8 +42,8 @@ logging.basicConfig(
 
 ELASTIC_INDEX_NAME = 'uploaded_data'
 USER = 'elastic'
-PASSWORD = '4Lnrd3BgtACXT61bP5GT'
-
+PASSWORD = 'X-9T4-O6HqBfAPciKE+2'
+ALLOWED_EXTENSIONS = set(['pdf','txt','doc','docx'])
 class Document(BaseModel):
     context: str
     question: str
@@ -133,11 +135,12 @@ def search(question: Question):
 
         return { 'prediction': predictions, 'time':  end - start  }
 
-@app.get('/pdf_reader')
-def pdf_reader():
+@app.post('/pdf_reader')
+def pdf_reader(filename:str):
     start = time.time()
     docs = []
-    file = "data/Infojegyzet_2020_51_fintech.pdf"
+    file = "data/"+filename
+    logging.info(file)
     text = extract_text(file)
     text = text.replace('-\n', '').replace('\n','').replace('\r', '')
     tokenized_text = tokenize_text(text, qa_pipeline.tokenizer)
@@ -162,16 +165,36 @@ def pdf_reader():
     end = time.time()
     return {'text': docs,  'time': end-start}
 
-@app.get('/delete_docs')
+@app.delete('/delete_docs')
 def delete_docs():
     start = time.time()
     es_client.delete_by_query(index=ELASTIC_INDEX_NAME, body={"query": {"match_all": {}}})
     end = time.time()
     return {'text': 'DONE',  'time': end-start}
 
+
+
 def tokenize_text(context, tokenizer, max_length = 384, stride = 128): 
     inputs = tokenizer(context, max_length=max_length, stride=stride, return_overflowing_tokens=True, return_offsets_mapping=True, add_special_tokens = False)
     return inputs
+
+@app.post("/upload_file")
+async def create_upload_file(file: UploadFile = File(...)):
+    if not file:
+        return {"message": "No upload file sent"}
+    else:
+        if allowed_file(file.filename)==True:
+            with open(f'./data/{file.filename}','wb')as buffer:
+                shutil.copyfileobj(file.file,buffer)
+            pdf_reader(file.filename)
+            return {"message":"Uploaded successfully"}
+        else:
+            return{"message":"Illegal file extension"}
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=8000)
